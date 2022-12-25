@@ -3,61 +3,21 @@ const multer = require("multer");
 const upload = multer({ dest: "upload" });
 const fs = require("fs");
 const path = require("path");
-const connection = require("/config/mysql");
+const connection = require("../../config/mysql");
+const productController = require("./controller");
 
-router.get("/products", (req, res) => {
-  // const { page, total } = req.query;
-  // res.send({
-  //   status: "Succesfully",
-  //   message: "Welcome to Express JS Tutorial",
-  //   page,
-  //   total,
-  // });
-  connection.connect();
-  connection.query(
-    {
-      sql: "SELECT * FROM products",
-    },
-    (error, result) => {
-      if (error) {
-        res.send({
-          status: "failed",
-          response: "failed to fetch",
-        });
-      } else {
-        res.send({
-          status: "success",
-          response: result,
-        });
-      }
-    }
-  );
-  connection.end();
-});
+router.get("/products", productController.index);
 
-router.get("/product/:id", (req, res) => {
-  res.json({
-    id: req.params.id,
-  });
-});
+router.get("/products/:id", productController.view);
 
 //input
-router.post("/product/", upload.single("image"), (req, res) => {
-  const { name, price, stock, status } = req.body;
-  const image = req.file;
-  if (image) {
-    const target = path.join(__dirname, "upload", image.originalname);
-    fs.renameSync(image.path, target);
-    // res.json({
-    //   name,
-    //   price,
-    //   stock,
-    //   status,
-    //   image,
-    // });
-    res.sendFile(target);
-  }
-});
+router.post("/products/", upload.single("image"), productController.store);
+router.put("/products/:id", upload.single("image"), productController.update);
+router.delete(
+  "/products/:id",
+  upload.single("image"),
+  productController.destroy
+);
 
 // router.get("/:category/:tag", (req, res) => {
 //   const { category, tag } = req.params;
